@@ -1,3 +1,4 @@
+import custom_exception
 import requests
 from bs4 import BeautifulSoup
 
@@ -16,12 +17,13 @@ def get_url(url):
     response = requests.get(url+'/robots.txt', headers={
         'User - Agent': 'python - requests / 4.8.2(Compatible;{};{})'.format(user_agent['name'], user_agent['email'])},
                             timeout=10)
-    if response.status_code == 200:
-        # Only scrape URL if allowed by robots.txt
-        return requests.get(url)
-    else:
-        # TODO: raise not allowed by robots.txt exception
-        print("Not allowed by robots.txt")
+
+    # Only scrape URL if allowed by robots.txt
+    if response.status_code != 200:
+        raise custom_exception.DisallowedException(response.status_code)
+
+    return requests.get(url)
+
 
 
 def parse_links(soup):
@@ -42,9 +44,14 @@ if __name__ == '__main__':
     # Dictionary of websites to access
     urls = {
         'Web Scraper Test Site': 'http://webscraper.io',
-        'Disc': 'http://discworld.starturtle.net/lpc'
+        'Google': 'http://www.google.com',
+        'Reddit': 'https://www.reddit.com'
     }
 
     for key, value in urls.items():
         print(value)
-        print(parse_links(BeautifulSoup(get_url(value).text, 'html.parser')))
+        try:
+            page = BeautifulSoup(get_url(value).text, 'html.parser')
+            print(parse_links(page))
+        except custom_exception.DisallowedException as e:
+            print('Connection to {} not permitted with HTTP code {}. Does its robots.txt allow access?'.format(value, e.status))
