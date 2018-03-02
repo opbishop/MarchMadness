@@ -25,7 +25,6 @@ def get_url(url):
     return requests.get(url)
 
 
-
 def parse_links(soup):
     """
     Return a dictionary from all href links on site and their displayed String name on the page
@@ -40,18 +39,18 @@ def parse_links(soup):
     return results
 
 
-if __name__ == '__main__':
-    # Dictionary of websites to access
-    urls = {
-        'Web Scraper Test Site': 'http://webscraper.io',
-        'Google': 'http://www.google.com',
-        'Reddit': 'https://www.reddit.com'
-    }
+# Dictionary of websites to access
+urls = {
+    'Web Scraper Test Site': 'http://webscraper.io',
+    'Google': 'http://www.google.com',
+    'Reddit': 'https://www.reddit.com'
+}
 
-    for key, value in urls.items():
-        print(value)
-        try:
-            page = BeautifulSoup(get_url(value).text, 'html.parser')
-            print(parse_links(page))
-        except custom_exception.DisallowedException as e:
-            print('Connection to {} not permitted with HTTP code {}. Does its robots.txt allow access?'.format(value, e.status))
+for key, value in urls.items():
+    print(value)
+    try:
+        page = BeautifulSoup(get_url(value).text, 'html.parser')
+        print(parse_links(page))
+    except custom_exception.DisallowedException as e:
+        print('Connection to {} not permitted with HTTP code {}. Does its robots.txt allow access?'.format(value,
+                                                                                                           e.status))
