@@ -105,14 +105,22 @@ def parse_ss_stats(soup):
 
 
 def parse_historic(soup):
+    """
+    Read all tournament results and return as Pandas Dataframe
+
+    :param soup:
+    :return:
+    """
     schedule = soup.find_all('div', {'class': 'tournament-group-preview-holder mod-full mod-small-pd mod-pubg'})
 
     results = []
 
     # ignore total tournament standings by only considering [1:]
+    # for each game in the tournament
     for game in schedule[1:]:
         positions = []
         team_names = []
+        # for each team in the game
         for team_details in game.find_all('div', {'class': 'preview-item'}):
             strings = team_details.find_all('span', limit=2)
             positions.append(int(strings[0].text))
@@ -128,7 +136,13 @@ def parse_historic(soup):
     return results
 
 
-def parse_historic_results(soup):
+def parse_historic_stats(soup):
+    """
+    Read all tournament stats and return as Pandas Dataframe
+
+    :param soup:
+    :return:
+    """
     schedule = soup.find_all('div', {'class': 'tournament-group-preview-holder mod-full mod-small-pd mod-pubg'})
 
     results = []
@@ -159,6 +173,13 @@ def parse_historic_results(soup):
 
 
 def aggregate_historic_results(team_standings, team_stats):
+    """
+    Aggregate team standings & team stats into single results table, return sorted aggregated table
+
+    :param team_standings:
+    :param team_stats:
+    :return:
+    """
     historic_results = []
 
     for game in range(0, len(team_standings)):
@@ -177,6 +198,7 @@ def aggregate_historic_results(team_standings, team_stats):
     return results.sort_values('Overall Pts', ascending=False)
 
 
+# Run stuff
 # Dictionary of websites to access
 urls = {
     # 'Web Scraper Test Site': 'http://webscraper.io',
@@ -191,7 +213,7 @@ for key, value in urls.items():
         page = BeautifulSoup(get_url(value).text, 'html.parser')
 
         team_standings = parse_historic(page)
-        team_stats = parse_historic_results(page)
+        team_stats = parse_historic_stats(page)
 
         final_results = aggregate_historic_results(team_standings, team_stats)
 
