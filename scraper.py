@@ -3,6 +3,7 @@ import custom_exception
 import tldextract
 import requests
 from bs4 import BeautifulSoup
+import pandas as pd
 
 
 def get_url(url):
@@ -50,15 +51,45 @@ def parse_links(soup):
 
 
 def parse_ss_teams(soup):
-    teams = {}
+    positions = []
+    team_names = []
     team_list = soup.find('div', {'class': 'preview-item-list'})
 
     for team_details in team_list.find_all('div', {'class': 'preview-item'}):
         strings = team_details.find_all('span', limit=2)
-        teams[strings[0].text] = strings[1].text
+        positions.append(int(strings[0].text))
+        team_names.append(strings[1].text)
 
-    print(teams)
+    data = {
+        'Position': positions,
+        'Team Name': team_names
+    }
 
+    return pd.DataFrame(data, columns=['Position', 'Team Name'])
+
+
+def parse_ss_stats(soup):
+    team_list = soup.find('div', {'class': 'preview-item-list'})
+    team_details = team_list.find_all('div', {'class': 'preview-item'})
+    placement_pts = []
+    kills = []
+    kills_pts = []
+    overall_pts = []
+
+    for team in team_details:
+        placement_pts.append(team.contents[5].find('span').text)
+        kills.append(team.contents[7].find('span').text)
+        kills_pts.append(team.contents[9].find('span').text)
+        overall_pts.append(team.contents[11].find('span').text)
+
+    data = {
+        'Placement Pts': placement_pts,
+        'Kills': kills,
+        'Kill Pts': kills_pts,
+        'Overall Pts': overall_pts
+    }
+
+    return pd.DataFrame(data, columns=['Placement Pts', 'Kills', 'Kill Pts', 'Overall Pts'])
 
 # Dictionary of websites to access
 urls = {
@@ -72,9 +103,11 @@ for key, value in urls.items():
     print(value)
     try:
         page = BeautifulSoup(get_url(value).text, 'html.parser')
-        parse_ss_teams(page)
-        # print(page.prettify())
-        # print(parse_links(page))
+        team_standings = parse_ss_teams(page)
+        team_stats = parse_ss_stats(page)
+
+        print(pd.concat([team_standings,team_stats], axis=1))
+
     except custom_exception.DisallowedException as e:
         print('Connection to {} not permitted with HTTP code {}. Does its robots.txt allow access?'.format(value,
                                                                                                            e.status))
