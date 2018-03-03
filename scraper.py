@@ -103,12 +103,13 @@ def parse_ss_stats(soup):
 
     return pd.DataFrame(data, columns=['Placement Pts', 'Kills', 'Kill Pts', 'Overall Pts'])
 
+
 def parse_historic(soup):
     schedule = soup.find_all('div', {'class': 'tournament-group-preview-holder mod-full mod-small-pd mod-pubg'})
 
     results = []
 
-    #ignore total tournament standings by only considering [1:]
+    # ignore total tournament standings by only considering [1:]
     for game in schedule[1:]:
         positions = []
         team_names = []
@@ -126,6 +127,7 @@ def parse_historic(soup):
 
     return results
 
+
 def parse_historic_results(soup):
     schedule = soup.find_all('div', {'class': 'tournament-group-preview-holder mod-full mod-small-pd mod-pubg'})
 
@@ -133,7 +135,7 @@ def parse_historic_results(soup):
     # team_list = soup.find('div', {'class': 'preview-item-list'})
     # team_details = team_list.find_all('div', {'class': 'preview-item'})
 
-    for game in range(1,len(schedule)):
+    for game in range(1, len(schedule)):
         team_details = schedule[game].find_all('div', {'class': 'preview-item'})
         placement_pts = []
         kills = []
@@ -155,6 +157,26 @@ def parse_historic_results(soup):
         results.append(pd.DataFrame(data, columns=['Placement Pts', 'Kills', 'Kill Pts', 'Overall Pts']))
     return results
 
+
+def aggregate_historic_results(team_standings, team_stats):
+    historic_results = []
+
+    for game in range(0, len(team_standings)):
+        temp_df = pd.concat([team_standings[game], team_stats[game]], axis=1)
+        temp_df.drop('Position', axis=1, inplace=True)
+        historic_results.append(temp_df)
+
+    results = pd.concat(historic_results, ignore_index=True)
+
+    results[['Placement Pts', 'Kills', 'Kill Pts', 'Overall Pts']] = results[
+        ['Placement Pts', 'Kills', 'Kill Pts', 'Overall Pts']].apply(pd.to_numeric)
+
+    results = pd.pivot_table(results, values=['Placement Pts', 'Kills', 'Kill Pts', 'Overall Pts'], index='Team Name',
+                             aggfunc=sum)
+
+    return results.sort_values('Overall Pts', ascending=False)
+
+
 # Dictionary of websites to access
 urls = {
     # 'Web Scraper Test Site': 'http://webscraper.io',
@@ -164,15 +186,16 @@ urls = {
 }
 
 for key, value in urls.items():
-    print(value)
+
     try:
         page = BeautifulSoup(get_url(value).text, 'html.parser')
 
         team_standings = parse_historic(page)
         team_stats = parse_historic_results(page)
 
-        for game in range(0,len(team_standings)):
-            print(pd.concat([team_standings[game],team_stats[game]], axis=1))
+        final_results = aggregate_historic_results(team_standings, team_stats)
+
+        print(final_results)
 
     except custom_exception.DisallowedException as e:
         print('Connection to {} not permitted with HTTP code {}. Does its robots.txt allow access?'.format(value,
