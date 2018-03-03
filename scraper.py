@@ -51,6 +51,12 @@ def parse_links(soup):
 
 
 def parse_ss_teams(soup):
+    """
+    Read and return team position and name as a Pandas DataFrame
+
+    :param soup:
+    :return:
+    """
     positions = []
     team_names = []
     team_list = soup.find('div', {'class': 'preview-item-list'})
@@ -69,6 +75,12 @@ def parse_ss_teams(soup):
 
 
 def parse_ss_stats(soup):
+    """
+    Read and return team points as a Pandas DataFrame
+
+    :param soup:
+    :return:
+    """
     team_list = soup.find('div', {'class': 'preview-item-list'})
     team_details = team_list.find_all('div', {'class': 'preview-item'})
     placement_pts = []
