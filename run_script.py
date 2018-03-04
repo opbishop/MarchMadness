@@ -3,17 +3,15 @@ import custom_exception
 import scraper as scrape
 
 from bs4 import BeautifulSoup
-import _thread
 import threading
 import time
 import json
 
 
-def check_bbc(thread_name, delay):
+def check_bbc(delay):
     """
     Check BBC News for news stories
 
-    :param thread_name:
     :param delay: time to sleep thread for (s)
     :return:
     """
@@ -27,12 +25,10 @@ def check_bbc(thread_name, delay):
     persist(stories, 'bbc_stories')
 
 
-
-def check_sky(thread_name, delay):
+def check_sky(delay):
     """
     Check Sky News for news stories
 
-    :param thread_name:
     :param delay: time to sleep thread for (s)
     :return:
     """
@@ -51,7 +47,6 @@ def persist(stories, filename):
         json.dump(stories, outfile)
 
 
-
 # Dictionary of websites to access
 urls = {
     # 'StarLadder': 'https://starladder.com/en/starseries-i-league-pubg',
@@ -59,10 +54,11 @@ urls = {
     'Sky': 'https://news.sky.com/uk'
 }
 
+
 # Start a thread to check both news sources given (function, (args)
 try:
-    t1 = threading.Thread(target = check_bbc, args=('Thread 1', 10))
-    t2 = threading.Thread(target = check_sky, args=('Thread 1', 20))
+    t1 = threading.Thread(target=check_bbc, args=10)
+    t2 = threading.Thread(target=check_sky, args=20)
 
     t1.start()
     t2.start()
