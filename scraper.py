@@ -12,15 +12,16 @@ def get_url(url):
     :return:
     """
     user_agent = {
-        'name': 'John Smith',
-        'email': 'john.smith@js.com'
+        'name': 'opbishop',
+        'email': 'thebishopisin@gmail.com'
     }
     ext = tldextract.extract(url)
 
     response = requests.get('http://{}.{}/robots.txt'.format(ext.domain, ext.suffix), headers={
-        'User - Agent': 'python - requests / 4.8.2(Compatible;{};{})'.format(user_agent['name'], user_agent['email'])},
+        'User-Agent': 'python-requests/4.8.2 (Compatible;{};{})'.format(user_agent['name'], user_agent['email'])
+    },
                             timeout=10)
-
+    print(response.status_code)
     # Only scrape URL if allowed by robots.txt
     if response.status_code != 200:
         if response.status_code == 404:

@@ -1,4 +1,4 @@
-import data_processor as dp
+import news_data_processor as dp
 import custom_exception
 import scraper as scrape
 
@@ -8,24 +8,29 @@ from bs4 import BeautifulSoup
 # Run stuff
 # Dictionary of websites to access
 urls = {
-    # 'Web Scraper Test Site': 'http://webscraper.io',
-    'StarLadder': 'https://starladder.com/en/starseries-i-league-pubg',
-    # 'Google': 'http://www.google.com',
-    # 'Reddit': 'https://www.reddit.com'
+    # 'StarLadder': 'https://starladder.com/en/starseries-i-league-pubg',
+     'BBC': 'http://www.bbc.co.uk/news',
+     'Sky': 'https://news.sky.com/uk'
 }
 
-for key, value in urls.items():
 
-    try:
-        page = BeautifulSoup(scrape.get_url(value).text, 'html.parser')
+try:
+    bbc_page = BeautifulSoup(scrape.get_url(urls['BBC']).text, 'html.parser')
+    sky_page = BeautifulSoup(scrape.get_url(urls['Sky']).text, 'html.parser')
 
-        team_standings = dp.parse_historic(page)
-        team_stats = dp.parse_historic_stats(page)
+    bbc_stories = dp.bbc(bbc_page)
+    sky_stories = dp.sky(sky_page)
 
-        final_results = dp.aggregate_historic_results(team_standings, team_stats)
+    print(bbc_stories)
+    print(sky_stories)
 
-        print(final_results)
+    # team_standings = dp.parse_historic(page)
+    # team_stats = dp.parse_historic_stats(page)
+    #
+    # final_results = dp.aggregate_historic_results(team_standings, team_stats)
 
-    except custom_exception.DisallowedException as e:
-        print('Connection to {} not permitted with HTTP code {}. Does its robots.txt allow access?'.format(value,
-                                                                                                           e.status))
+    # print(final_results)
+
+except custom_exception.DisallowedException as e:
+    print('Connection to {} not permitted with HTTP code {}. Does its robots.txt allow access?'.format(value,
+                                                                                                       e.status))
