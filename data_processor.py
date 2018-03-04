@@ -81,10 +81,15 @@ def parse_historic(soup):
     schedule = soup.find_all('div', {'class': 'tournament-group-preview-holder mod-full mod-small-pd mod-pubg'})
 
     results = []
+    i = 0
 
     # ignore total tournament standings by only considering [1:]
     # for each game in the tournament
     for game in schedule[1:]:
+        i+= 1
+        # Ignore games 1, 7, 13, 19 (showcase games which don't count towards points)
+        if i in (1, 7, 13, 19):
+            continue
         positions = []
         team_names = []
         # for each team in the game
@@ -110,13 +115,18 @@ def parse_historic_stats(soup):
     :param soup:
     :return:
     """
+
     schedule = soup.find_all('div', {'class': 'tournament-group-preview-holder mod-full mod-small-pd mod-pubg'})
 
     results = []
     # team_list = soup.find('div', {'class': 'preview-item-list'})
     # team_details = team_list.find_all('div', {'class': 'preview-item'})
-
+    i = 0
     for game in range(1, len(schedule)):
+        i+= 1
+        # Ignore games 1, 7, 13, 19 (showcase games which don't count towards points)
+        if i in (1, 7, 13, 19):
+            continue
         team_details = schedule[game].find_all('div', {'class': 'preview-item'})
         placement_pts = []
         kills = []
@@ -161,5 +171,4 @@ def aggregate_historic_results(team_standings, team_stats):
 
     results = pd.pivot_table(results, values=['Placement Pts', 'Kills', 'Kill Pts', 'Overall Pts'], index='Team Name',
                              aggfunc=sum)
-
     return results.sort_values('Overall Pts', ascending=False)
