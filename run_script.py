@@ -57,8 +57,8 @@ urls = {
 
 # Start a thread to check both news sources given (function, (args)
 try:
-    t1 = threading.Thread(target=check_bbc, args=10)
-    t2 = threading.Thread(target=check_sky, args=20)
+    t1 = threading.Thread(target=check_bbc, args=(10,))
+    t2 = threading.Thread(target=check_sky, args=(20,))
 
     t1.start()
     t2.start()
