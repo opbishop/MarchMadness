@@ -1,6 +1,6 @@
 import data_processor as dp
 import custom_exception
-import scraper as scrape
+# import scraper as scrape
 
 from bs4 import BeautifulSoup
 
@@ -14,8 +14,7 @@ try:
     soup = BeautifulSoup(html, 'html.parser')
     bracket = soup.find('div', {'class': 'bracket'})
 
-    dp.teams(bracket)
-    dp.games(bracket)
+    dp.tournament_regions(bracket)
 
 except custom_exception.DisallowedException as e:
     print('Connection not permitted with HTTP code {}. Does its robots.txt allow access?'.format(e.status))
